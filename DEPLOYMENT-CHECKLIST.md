@@ -43,7 +43,6 @@ Your website is **100% ready for deployment**! Here's what's already complete:
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `NEXT_PUBLIC_GOOGLE_ADSENSE_ID` (optional - can add later)
-   - `N8N_API_KEY` (required for blog post API - generate a secure random string)
 4. Deploy!
 
 ### 3. Verify Cron Job (Automatic)

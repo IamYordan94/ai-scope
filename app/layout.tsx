@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Link from 'next/link';
 import { Search } from 'lucide-react';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export const metadata: Metadata = {
   title: "AI Tool Directory - Discover the Best AI Tools",
@@ -30,8 +32,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+        <ThemeProvider>
         <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
@@ -42,18 +45,19 @@ export default function RootLayout({
                 <span className="font-bold text-xl text-gray-900">AI Tool Directory</span>
               </Link>
               <div className="flex items-center gap-6">
-                <Link href="/tools" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                <Link href="/tools" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
                   Browse Tools
                 </Link>
-                <Link href="/blog" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                <Link href="/blog" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
                   Blog
                 </Link>
-                <Link href="/compare" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                <Link href="/compare" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
                   Compare
                 </Link>
-                <Link href="/tools" className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors" aria-label="Search tools">
+                <Link href="/tools" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" aria-label="Search tools">
                   <Search className="w-5 h-5" />
                 </Link>
+                <ThemeToggle />
               </div>
             </div>
           </div>
@@ -96,6 +100,7 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+        </ThemeProvider>
       </body>
     </html>
   );

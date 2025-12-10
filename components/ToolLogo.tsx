@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Tool } from '@/types/tool';
-import { getLogoUrl } from '@/lib/logo-utils';
+import { getLogoUrl, extractDomain, getLogoUrlOptions } from '@/lib/logo-utils';
 
 export default function ToolLogo({ tool }: { tool: Tool }) {
   const [imageError, setImageError] = useState(false);
@@ -18,18 +18,16 @@ export default function ToolLogo({ tool }: { tool: Tool }) {
 
   // Handle image errors - try fallbacks before giving up
   const handleImageError = () => {
-    if (retryCount < 2 && tool.website_url) {
+    if (retryCount < 3 && tool.website_url) {
       // Try alternative logo sources
-      const domain = tool.website_url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
-      const fallbacks = [
-        `https://logo.clearbit.com/${domain}`,
-        `https://icons.duckduckgo.com/ip3/${domain}.ico`,
-      ];
-      
-      if (retryCount < fallbacks.length) {
-        setLogoUrl(fallbacks[retryCount]);
-        setRetryCount(prev => prev + 1);
-        return;
+      const domain = extractDomain(tool.website_url);
+      if (domain) {
+        const fallbacks = getLogoUrlOptions(domain);
+        if (retryCount < fallbacks.length) {
+          setLogoUrl(fallbacks[retryCount]);
+          setRetryCount(prev => prev + 1);
+          return;
+        }
       }
     }
     // All fallbacks failed, show initial

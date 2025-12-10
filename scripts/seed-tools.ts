@@ -4,6 +4,7 @@
 import { config } from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 import { slugify } from '../lib/tools';
+import { comprehensiveTools } from '../lib/comprehensive-tools';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -27,7 +28,8 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const initialTools = [
+// Use comprehensive tools list (60+ tools)
+const initialTools = comprehensiveTools;
   // Text AI
   {
     name: 'ChatGPT',

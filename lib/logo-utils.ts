@@ -17,7 +17,7 @@ export function extractDomain(url: string | null): string | null {
 
 /**
  * Generate logo URL from website URL using multiple fallback services
- * Returns an array of URLs to try in order
+ * Returns the best available logo URL
  */
 export function getLogoUrl(websiteUrl: string | null, existingLogoUrl?: string | null): string | null {
   // If we already have a logo URL (and it's not Clearbit), use it
@@ -30,9 +30,23 @@ export function getLogoUrl(websiteUrl: string | null, existingLogoUrl?: string |
   const domain = extractDomain(websiteUrl);
   if (!domain) return null;
 
-  // Use Google favicon service - most reliable
-  // Removed sz parameter for better compatibility
-  return `https://www.google.com/s2/favicons?domain=${domain}`;
+  // Try direct favicon first (most accurate)
+  // Then fallback to Google's favicon service
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+}
+
+/**
+ * Get multiple logo URL options for fallback
+ */
+export function getLogoUrlOptions(domain: string | null): string[] {
+  if (!domain) return [];
+  
+  return [
+    `https://${domain}/favicon.ico`,
+    `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+    `https://logo.clearbit.com/${domain}`,
+    `https://icons.duckduckgo.com/ip3/${domain}.ico`,
+  ];
 }
 
 /**

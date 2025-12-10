@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { slugify } from '@/lib/tools';
-import { initialToolsData } from '@/lib/tools-data';
+import { comprehensiveTools } from '@/lib/comprehensive-tools';
 
-// Full seed with all tools (30+ popular AI tools)
-const initialTools = initialToolsData;
+// Full seed with comprehensive tools (60+ popular AI tools)
+const initialTools = comprehensiveTools;
 
 export async function POST() {
   try {

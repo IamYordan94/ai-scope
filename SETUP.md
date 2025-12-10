@@ -26,7 +26,6 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 NEXT_PUBLIC_GOOGLE_ADSENSE_ID=your-adsense-id (optional, add later)
-N8N_API_KEY=your-secret-api-key-here (required for blog post API)
 ```
 
 ## Step 4: Seed Initial Data

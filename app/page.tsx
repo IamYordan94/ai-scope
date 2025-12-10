@@ -86,15 +86,49 @@ export default async function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-20 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <section className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 py-24 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
-              Discover the Best AI Tools
+            <div className="inline-block mb-4">
+              <span className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-semibold border border-white/30">
+                🚀 {tools.length > 0 ? `${tools.length}+ AI Tools` : 'Discover AI Tools'}
+              </span>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl">
+              Discover the Best
+              <span className="block bg-gradient-to-r from-yellow-200 to-pink-200 bg-clip-text text-transparent">
+                AI Tools
+              </span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Find, compare, and choose the perfect AI tool for your needs. Updated daily with the latest tools and features.
+            <p className="text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto drop-shadow-lg">
+              Find, compare, and choose the perfect AI tool for your needs. 
+              <span className="block mt-2 text-lg">Updated weekly with the latest tools and features.</span>
             </p>
+            
+            {/* Stats */}
+            {tools.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-8 mb-10">
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/20">
+                  <div className="text-3xl font-bold text-white">{tools.length}+</div>
+                  <div className="text-white/80 text-sm">AI Tools</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/20">
+                  <div className="text-3xl font-bold text-white">{categories.length}</div>
+                  <div className="text-white/80 text-sm">Categories</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/20">
+                  <div className="text-3xl font-bold text-white">Weekly</div>
+                  <div className="text-white/80 text-sm">Updates</div>
+                </div>
+              </div>
+            )}
             {tools.length === 0 && (
               <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-xl text-blue-900 max-w-2xl mx-auto shadow-md">
                 <p className="font-bold text-lg mb-2">🚀 Get Started - Seed Your Database</p>

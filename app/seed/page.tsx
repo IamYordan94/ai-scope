@@ -50,17 +50,43 @@ export default function SeedPage() {
           </p>
           
           <div className="space-y-4">
+            <div className="bg-gradient-to-br from-blue-600 to-purple-600 border-2 border-blue-300 rounded-lg p-6 text-white">
+              <h2 className="text-xl font-bold mb-2">🚀 Populate Now (BEST OPTION)</h2>
+              <p className="text-white/90 mb-4">
+                Add 60+ comprehensive tools + fetch latest from GitHub/Hugging Face. This ensures your site is fully populated on deployment!
+              </p>
+              <button
+                onClick={async () => {
+                  setLoading(true);
+                  setResult(null);
+                  try {
+                    const response = await fetch('/api/populate-now', { method: 'POST' });
+                    const data = await response.json();
+                    setResult(data);
+                  } catch (error: any) {
+                    setResult({ error: error.message });
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                className="px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl font-bold text-lg w-full transform hover:scale-105"
+              >
+                {loading ? '⏳ Populating Database...' : '✨ Populate Now (60+ tools + Latest)'}
+              </button>
+            </div>
+
             <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">🚀 Quick Start (Recommended)</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">📦 Seed Only (60+ Tools)</h2>
               <p className="text-gray-700 mb-4">
-                Add 30+ popular AI tools instantly to your database. This includes ChatGPT, Claude, Midjourney, and many more.
+                Add 60+ comprehensive AI tools instantly. Includes all major tools like ChatGPT, Claude, Midjourney, and more.
               </p>
               <button
                 onClick={handleSeed}
                 disabled={loading}
                 className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl font-semibold text-lg w-full"
               >
-                {loading ? '⏳ Seeding Database...' : '✨ Seed Initial Tools (30+ tools)'}
+                {loading ? '⏳ Seeding Database...' : '✨ Seed Comprehensive Tools (60+ tools)'}
               </button>
             </div>
             
@@ -128,16 +154,26 @@ export default function SeedPage() {
             )}
             {result.results && (
               <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-blue-800 font-semibold mb-2">📊 Scraper Results:</p>
+                <p className="text-blue-800 font-semibold mb-2">📊 Population Results:</p>
                 <ul className="text-blue-700 text-sm space-y-1">
-                  <li>• New tools found: {result.results.newTools || 0}</li>
-                  <li>• Tools updated: {result.results.updatedTools || 0}</li>
+                  {result.results.seeded && (
+                    <li>• Seeded tools: {result.results.seeded}</li>
+                  )}
+                  {result.results.scrapedNew !== undefined && (
+                    <li>• New tools from scraper: {result.results.scrapedNew}</li>
+                  )}
+                  {result.results.scrapedUpdated !== undefined && (
+                    <li>• Tools updated: {result.results.scrapedUpdated}</li>
+                  )}
+                  {result.results.totalTools && (
+                    <li className="font-bold">• Total tools in database: {result.results.totalTools}</li>
+                  )}
                   {result.results.errors && result.results.errors.length > 0 && (
                     <li>• Errors: {result.results.errors.length}</li>
                   )}
                 </ul>
                 <p className="text-blue-600 text-xs mt-2">
-                  💡 Your website automatically runs this every Monday at 6 AM UTC
+                  💡 Your website automatically runs scraper every Monday at 6 AM UTC to add new tools
                 </p>
               </div>
             )}
