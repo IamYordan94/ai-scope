@@ -1,0 +1,230 @@
+import Link from 'next/link';
+import { getAllTools, getAllCategories } from '@/lib/supabase';
+import ToolCard from '@/components/ToolCard';
+import SearchBar from '@/components/SearchBar';
+import AdSense from '@/components/AdSense';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'AI Tool Directory - Discover the Best AI Tools',
+  description: 'Comprehensive directory of AI tools for text, image, video, code, and more. Compare features, pricing, and find the perfect AI tool for your needs.',
+  openGraph: {
+    title: 'AI Tool Directory - Discover the Best AI Tools',
+    description: 'Find, compare, and choose the perfect AI tool for your needs.',
+    type: 'website',
+  },
+};
+
+// Disable caching for this page to ensure fresh data
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  let tools: any[] = [];
+  let categories: any[] = [];
+  let errorMessage: string | null = null;
+  
+  try {
+    // Fetch categories first
+    const categoriesResult = await Promise.allSettled([
+      getAllCategories(),
+    ]);
+    
+    if (categoriesResult[0].status === 'fulfilled') {
+      categories = categoriesResult[0].value;
+    }
+    
+    // Try to fetch all tools
+    try {
+      tools = await getAllTools();
+      if (tools.length === 0 && categories.length > 0) {
+        // If getAllTools returns empty but we have categories, try fallback
+        console.log('getAllTools returned empty, trying category fallback...');
+        const { getToolsByCategory } = await import('@/lib/supabase');
+        const categoryTools = await Promise.all(
+          categories.map(cat => 
+            getToolsByCategory(cat.name).catch(() => [])
+          )
+        );
+        tools = categoryTools.flat();
+        console.log('Fallback: Fetched', tools.length, 'tools by category');
+      }
+    } catch (toolsError: any) {
+      console.error('getAllTools failed, trying fallback:', toolsError.message);
+      
+      // Fallback: Fetch tools by category and combine
+      if (categories.length > 0) {
+        const { getToolsByCategory } = await import('@/lib/supabase');
+        const categoryTools = await Promise.all(
+          categories.map(cat => 
+            getToolsByCategory(cat.name).catch(() => [])
+          )
+        );
+        tools = categoryTools.flat();
+        console.log('Fallback: Fetched', tools.length, 'tools by category');
+      }
+      
+      errorMessage = toolsError.message;
+    }
+  } catch (error: any) {
+    console.error('Unexpected error on homepage:', error);
+    errorMessage = error.message;
+  }
+  
+  // Debug: Log what we got
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Homepage - Tools count:', tools.length, 'Categories count:', categories.length);
+    if (tools.length === 0 && categories.length > 0) {
+      console.log('Warning: No tools found but categories exist. Check /api/debug-tools for details.');
+    }
+  }
+
+  const featuredTools = tools.slice(0, 6);
+  const newTools = tools.slice(0, 8);
+
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-20 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
+              Discover the Best AI Tools
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Find, compare, and choose the perfect AI tool for your needs. Updated daily with the latest tools and features.
+            </p>
+            {tools.length === 0 && (
+              <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-xl text-blue-900 max-w-2xl mx-auto shadow-md">
+                <p className="font-bold text-lg mb-2">🚀 Get Started - Seed Your Database</p>
+                <p className="text-sm mb-4 text-blue-700">Your database is empty. Click below to add 30+ popular AI tools instantly:</p>
+                <a 
+                  href="/seed" 
+                  className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl font-medium transform hover:scale-105"
+                >
+                  Seed Database Now →
+                </a>
+              </div>
+            )}
+            {errorMessage && (
+              <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm max-w-2xl mx-auto">
+                <p>Note: {errorMessage}</p>
+                <p className="mt-2">Tools are available when browsing by category.</p>
+              </div>
+            )}
+            <div className="flex justify-center">
+              <SearchBar />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Ad Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AdSense />
+      </div>
+
+      {/* Categories */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">Browse by Category</h2>
+          {categories.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No categories available yet.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/tools?category=${encodeURIComponent(category.name)}`}
+                  className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 text-center border border-transparent hover:border-blue-200"
+                >
+                  <Sparkles className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                  <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
+                  <p className="text-sm text-gray-600">
+                    {tools.filter(t => t.category === category.name).length} tools
+                  </p>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Featured Tools */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-10">
+            <h2 className="text-3xl font-bold text-gray-900">Featured Tools</h2>
+            <Link href="/tools" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors group">
+              View All <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+          {featuredTools.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-8 max-w-md mx-auto">
+                <p className="text-gray-500 text-lg mb-2 font-semibold">No featured tools available yet</p>
+                <p className="text-gray-400 text-sm mb-6">Total tools in database: <span className="font-bold text-gray-600">{tools.length}</span></p>
+                {tools.length === 0 && (
+                  <a 
+                    href="/seed" 
+                    className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg font-medium"
+                  >
+                    Seed Database with Initial Tools →
+                  </a>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredTools.map((tool) => (
+                <ToolCard key={tool.id} tool={tool} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Ad Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AdSense />
+      </div>
+
+      {/* New Tools */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center mb-10">
+            <h2 className="text-3xl font-bold text-gray-900">Recently Added</h2>
+            <Link href="/tools" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors group">
+              View All <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+          {newTools.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-8 max-w-md mx-auto">
+                <p className="text-gray-500 text-lg mb-2 font-semibold">No tools available yet</p>
+                <p className="text-gray-400 text-sm mb-6">Total tools in database: <span className="font-bold text-gray-600">{tools.length}</span></p>
+                {tools.length === 0 && (
+                  <a 
+                    href="/seed" 
+                    className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg font-medium"
+                  >
+                    Seed Database with Initial Tools →
+                  </a>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {newTools.map((tool) => (
+                <ToolCard key={tool.id} tool={tool} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
