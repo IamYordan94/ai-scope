@@ -1,13 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { fetchAndAddNewTools, validateToolLink } from '@/lib/scraper';
 import { getSupabaseAdmin } from '@/lib/supabase';
+import { isAuthorized, getUnauthorizedResponse } from '@/lib/auth-utils';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
-  // Verify this is a cron request (optional: add auth header check)
-  // For Vercel Cron, this is automatically authenticated
+export async function GET(request: NextRequest) {
+  // Allow Vercel Cron (has special header) or authorized requests
+  const isVercelCron = request.headers.get('x-vercel-cron') === '1';
+  
+  if (!isVercelCron && !isAuthorized(request)) {
+    return getUnauthorizedResponse();
+  }
   
   try {
     console.log('Starting weekly tool update...');

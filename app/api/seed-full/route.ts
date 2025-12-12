@@ -1,12 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { slugify } from '@/lib/tools';
 import { comprehensiveTools } from '@/lib/comprehensive-tools';
+import { isAuthorized, getUnauthorizedResponse } from '@/lib/auth-utils';
 
 // Full seed with comprehensive tools (60+ popular AI tools)
 const initialTools = comprehensiveTools;
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // Check authorization
+  if (!isAuthorized(request)) {
+    return getUnauthorizedResponse();
+  }
   try {
     // Check environment variables first
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

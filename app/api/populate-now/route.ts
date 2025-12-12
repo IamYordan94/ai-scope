@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { fetchAndAddNewTools } from '@/lib/scraper';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { slugify } from '@/lib/tools';
 import { comprehensiveTools } from '@/lib/comprehensive-tools';
+import { isAuthorized, getUnauthorizedResponse } from '@/lib/auth-utils';
 
 /**
  * Populate database immediately with:
@@ -11,7 +12,11 @@ import { comprehensiveTools } from '@/lib/comprehensive-tools';
  * 
  * This ensures the site is fully populated on first deployment
  */
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // Check authorization
+  if (!isAuthorized(request)) {
+    return getUnauthorizedResponse();
+  }
   try {
     const supabase = getSupabaseAdmin();
     const results = {

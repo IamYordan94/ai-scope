@@ -43,7 +43,9 @@ export default function ToolLogo({ tool }: { tool: Tool }) {
         height={120}
         className="rounded-lg object-contain bg-gray-50 w-[120px] h-[120px]"
         onError={handleImageError}
-        loading="lazy"
+        loading="eager"
+        decoding="async"
+        fetchPriority="high"
       />
     );
   }

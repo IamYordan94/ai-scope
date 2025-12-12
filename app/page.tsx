@@ -7,18 +7,17 @@ import { ArrowRight, Sparkles } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'AI Tool Directory - Discover the Best AI Tools',
+  title: 'AI Scope - Discover the Best AI Tools',
   description: 'Comprehensive directory of AI tools for text, image, video, code, and more. Compare features, pricing, and find the perfect AI tool for your needs.',
   openGraph: {
-    title: 'AI Tool Directory - Discover the Best AI Tools',
+    title: 'AI Scope - Discover the Best AI Tools',
     description: 'Find, compare, and choose the perfect AI tool for your needs.',
     type: 'website',
   },
 };
 
-// Disable caching for this page to ensure fresh data
-export const revalidate = 0;
-export const dynamic = 'force-dynamic';
+// ISR: Revalidate every hour (3600 seconds)
+export const revalidate = 3600;
 
 export default async function Home() {
   let tools: any[] = [];
@@ -86,7 +85,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 py-24 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 dark:from-blue-900 dark:via-purple-900 dark:to-pink-900 py-24 relative overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
@@ -96,11 +95,6 @@ export default async function Home() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
-            <div className="inline-block mb-4">
-              <span className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-semibold border border-white/30">
-                🚀 {tools.length > 0 ? `${tools.length}+ AI Tools` : 'Discover AI Tools'}
-              </span>
-            </div>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl">
               Discover the Best
               <span className="block bg-gradient-to-r from-yellow-200 to-pink-200 bg-clip-text text-transparent">
@@ -130,9 +124,9 @@ export default async function Home() {
               </div>
             )}
             {tools.length === 0 && (
-              <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300 rounded-xl text-blue-900 max-w-2xl mx-auto shadow-md">
-                <p className="font-bold text-lg mb-2">🚀 Get Started - Seed Your Database</p>
-                <p className="text-sm mb-4 text-blue-700">Your database is empty. Click below to add 30+ popular AI tools instantly:</p>
+              <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border-2 border-blue-300 dark:border-blue-700 rounded-xl text-blue-900 dark:text-blue-100 max-w-2xl mx-auto shadow-md">
+                <p className="font-bold text-lg mb-2 dark:text-blue-100">🚀 Get Started - Seed Your Database</p>
+                <p className="text-sm mb-4 text-blue-700 dark:text-blue-200">Your database is empty. Click below to add 100+ popular AI tools instantly:</p>
                 <a 
                   href="/seed" 
                   className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl font-medium transform hover:scale-105"
@@ -160,9 +154,9 @@ export default async function Home() {
       </div>
 
       {/* Categories */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-gray-800 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">Browse by Category</h2>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-10 text-center">Browse by Category</h2>
           {categories.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500">No categories available yet.</p>
@@ -173,11 +167,11 @@ export default async function Home() {
                 <Link
                   key={category.id}
                   href={`/tools?category=${encodeURIComponent(category.name)}`}
-                  className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 hover:shadow-xl hover:scale-105 transition-all duration-300 text-center border border-transparent hover:border-blue-200"
+                  className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 rounded-xl p-6 shadow-3d card-3d text-center border border-transparent hover:border-blue-200 dark:hover:border-blue-700"
                 >
-                  <Sparkles className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-                  <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
-                  <p className="text-sm text-gray-600">
+                  <Sparkles className="w-8 h-8 mx-auto mb-2 text-blue-600 dark:text-blue-400" />
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{category.name}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     {tools.filter(t => t.category === category.name).length} tools
                   </p>
                 </Link>
@@ -191,7 +185,7 @@ export default async function Home() {
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900">Featured Tools</h2>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Featured Tools</h2>
             <Link href="/tools" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors group">
               View All <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -227,10 +221,10 @@ export default async function Home() {
       </div>
 
       {/* New Tools */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-gray-800 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900">Recently Added</h2>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Recently Added</h2>
             <Link href="/tools" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors group">
               View All <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>

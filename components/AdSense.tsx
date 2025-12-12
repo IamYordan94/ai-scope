@@ -18,13 +18,9 @@ export default function AdSense({
 }: AdSenseProps) {
   const adsenseId = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID;
 
+  // Hide ad spaces completely until AdSense ID is configured
   if (!adsenseId) {
-    return (
-      <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded p-8 text-center text-gray-500">
-        <p>Ad Space</p>
-        <p className="text-xs mt-2">Add your Google AdSense ID to display ads</p>
-      </div>
-    );
+    return null;
   }
 
   return (

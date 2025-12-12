@@ -289,7 +289,12 @@ export async function validateToolLink(url: string): Promise<boolean> {
   }
 }
 
-// Main function to fetch and add new tools
+/**
+ * Main function to fetch and add new tools from various sources
+ * Fetches from GitHub, Hugging Face, and other sources
+ * Automatically categorizes, validates, and deduplicates tools
+ * @returns Promise resolving to object with counts of new/updated tools and any errors
+ */
 export async function fetchAndAddNewTools(): Promise<{
   newTools: number;
   updatedTools: number;

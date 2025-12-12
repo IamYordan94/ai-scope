@@ -1,10 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Tool } from '@/types/tool';
-import ToolComparison from '@/components/ToolComparison';
 import AdSense from '@/components/AdSense';
-import { X, Plus, Loader2 } from 'lucide-react';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { X, Plus } from 'lucide-react';
+
+// Lazy load ToolComparison component (code splitting)
+const ToolComparison = dynamic(() => import('@/components/ToolComparison'), {
+  loading: () => <div className="text-center py-8 text-gray-500">Loading comparison...</div>,
+  ssr: false,
+});
 
 export default function ComparePage() {
   const [allTools, setAllTools] = useState<Tool[]>([]);
@@ -61,12 +68,11 @@ export default function ComparePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading tools...</p>
-        </div>
-      </div>
+      <LoadingSpinner 
+        size="lg" 
+        text="Loading tools..." 
+        fullScreen={true} 
+      />
     );
   }
 

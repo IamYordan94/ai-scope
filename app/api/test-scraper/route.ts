@@ -1,7 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { scrapeGitHubAITools, scrapeHuggingFaceSpaces, scrapeTheresAnAIForThat } from '@/lib/scraper';
+import { isAuthorized, getUnauthorizedResponse } from '@/lib/auth-utils';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Check authorization
+  if (!isAuthorized(request)) {
+    return getUnauthorizedResponse();
+  }
   try {
     const results = {
       github: { count: 0, tools: [] as any[] },

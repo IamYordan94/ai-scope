@@ -1,12 +1,13 @@
 {
-  "name": "ai-tool-directory",
+  "name": "ai-scope",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "analyze": "node scripts/analyze-bundle.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",

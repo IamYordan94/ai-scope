@@ -1,4 +1,4 @@
-# AI Tool Directory
+# AI Scope
 
 A comprehensive directory of AI tools with search, filtering, and comparison features. Built with Next.js 14, TypeScript, Tailwind CSS, and Supabase.
 
@@ -44,6 +44,7 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 NEXT_PUBLIC_GOOGLE_ADSENSE_ID=your_adsense_id (optional)
+ADMIN_SECRET_KEY=your_admin_secret_key (required for production)
 ```
 
 ### 4. Seed Initial Data

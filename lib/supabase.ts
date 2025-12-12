@@ -79,8 +79,9 @@ export const getAllTools = async (): Promise<Tool[]> => {
     
     console.log(`getAllTools: Found ${tools.length} tools`);
     return tools;
-  } catch (error: any) {
-    console.error('getAllTools failed:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('getAllTools failed:', message);
     throw error;
   }
 };
@@ -146,8 +147,9 @@ export const getAllPosts = async (): Promise<Post[]> => {
     }
     
     return (data || []) as Post[];
-  } catch (error: any) {
-    console.error('getAllPosts failed:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('getAllPosts failed:', message);
     throw error;
   }
 };
@@ -174,8 +176,9 @@ export const getPostBySlug = async (slug: string): Promise<Post | null> => {
     }
     
     return data as Post;
-  } catch (error: any) {
-    console.error('getPostBySlug failed:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('getPostBySlug failed:', message);
     return null;
   }
 };
@@ -198,8 +201,33 @@ export const getPostsByTag = async (tag: string): Promise<Post[]> => {
     }
     
     return (data || []) as Post[];
-  } catch (error: any) {
-    console.error('getPostsByTag failed:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('getPostsByTag failed:', message);
+    throw error;
+  }
+};
+
+// Get ALL posts (including drafts and scheduled) - for admin use
+export const getAllPostsAdmin = async (): Promise<Post[]> => {
+  try {
+    // Use admin client to ensure we can read all posts (including drafts)
+    const client = getSupabaseAdmin();
+    
+    const { data, error } = await client
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching all posts:', error);
+      throw error;
+    }
+    
+    return (data || []) as Post[];
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('getAllPostsAdmin failed:', message);
     throw error;
   }
 };

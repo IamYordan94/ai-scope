@@ -45,8 +45,13 @@ export default function ToolCard({ tool }: ToolCardProps) {
   const isPopular = (tool.popularity_score || 0) > 10;
 
   return (
-    <Link href={`/tools/${tool.slug}`} className="group block" aria-label={`View details for ${tool.name}`}>
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 h-full flex flex-col transform hover:-translate-y-2 relative overflow-hidden">
+    <Link 
+      href={`/tools/${tool.slug}`} 
+      className="group block" 
+      aria-label={`View details for ${tool.name}`}
+      prefetch={true}
+    >
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-3d card-3d h-full flex flex-col relative overflow-hidden">
         {/* Badge for new/popular tools */}
         {(isNew || isPopular) && (
           <div className="absolute top-4 right-4 z-10">
@@ -65,8 +70,12 @@ export default function ToolCard({ tool }: ToolCardProps) {
           </div>
         )}
 
-        {/* Gradient background effect */}
+        {/* Gradient background effect with 3D depth */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 via-purple-50/0 to-pink-50/0 dark:from-blue-900/0 dark:via-purple-900/0 dark:to-pink-900/0 group-hover:from-blue-50/50 group-hover:via-purple-50/30 group-hover:to-pink-50/50 dark:group-hover:from-blue-900/20 dark:group-hover:via-purple-900/20 dark:group-hover:to-pink-900/20 transition-all duration-300 pointer-events-none" />
+        {/* 3D Depth Shadow */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20 dark:opacity-30"></div>
+        </div>
 
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-4">
@@ -81,6 +90,8 @@ export default function ToolCard({ tool }: ToolCardProps) {
                     className="rounded-lg object-contain w-full h-full"
                     onError={handleImageError}
                     loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
                   />
                 </div>
               ) : (
