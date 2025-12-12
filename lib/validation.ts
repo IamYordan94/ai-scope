@@ -10,28 +10,6 @@ export interface ValidationResult {
 }
 
 /**
- * Validates post data before submission
- * @param data - Post data to validate
- * @returns Validation result with errors array
- */
-export function validatePostData(data: {
-  title: string;
-  content_html: string;
-}): ValidationResult {
-  const errors: string[] = [];
-  
-  if (!data.title || data.title.trim().length < LIMITS.MIN_TITLE_LENGTH) {
-    errors.push(`Title must be at least ${LIMITS.MIN_TITLE_LENGTH} characters`);
-  }
-  
-  if (!data.content_html || data.content_html.trim().length < LIMITS.MIN_CONTENT_LENGTH) {
-    errors.push(`Content must be at least ${LIMITS.MIN_CONTENT_LENGTH} characters`);
-  }
-  
-  return { valid: errors.length === 0, errors };
-}
-
-/**
  * Validates tool data
  * @param data - Tool data to validate
  * @returns Validation result with errors array

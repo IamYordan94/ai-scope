@@ -59,9 +59,6 @@ export default function RootLayout({
                 <Link href="/tools" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors" prefetch={true}>
                   Browse Tools
                 </Link>
-                <Link href="/blog" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors" prefetch={true}>
-                  Blog
-                </Link>
                 <Link href="/compare" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors" prefetch={true}>
                   Compare
                 </Link>
