@@ -42,23 +42,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <meta name="google-adsense-account" content="ca-pub-9007185070437670" />
-      </head>
       <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
         {/* AdSense Script - beforeInteractive strategy injects into head */}
-        <Script
-          id="adsbygoogle-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (adsbygoogle = window.adsbygoogle || []).push({
-                google_ad_client: "ca-pub-9007185070437670",
-                enable_page_level_ads: true
-              });
-            `,
-          }}
-        />
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9007185070437670"
