@@ -130,140 +130,76 @@ export const getAllCategories = async (): Promise<Category[]> => {
 };
 
 // Blog post helper functions
+/**
+ * Get all published blog posts
+ * Uses anon client which respects RLS policy: published_at IS NOT NULL AND published_at <= NOW()
+ * RLS policy automatically filters, so we don't need manual filtering
+ */
 export const getAllPosts = async (): Promise<Post[]> => {
   try {
-    const client = getSupabaseClient();
+    const client = getSupabaseClient(); // Anon client respects RLS
     
+    // RLS policy automatically filters: published_at IS NOT NULL AND published_at <= NOW()
+    // So we can just query and order - RLS handles the filtering
     const { data, error } = await client
       .from('posts')
       .select('*')
-      .not('published_at', 'is', null)
-      .lte('published_at', new Date().toISOString())
       .order('published_at', { ascending: false });
     
     if (error) {
-      console.error('Error fetching posts:', error);
+      console.error('[getAllPosts] Error fetching posts:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      });
       throw error;
     }
     
-    return (data || []) as Post[];
+    // RLS should have already filtered, but double-check in case RLS is disabled
+    const now = new Date().toISOString();
+    const publishedPosts = (data || []).filter(post => 
+      post.published_at && new Date(post.published_at) <= new Date(now)
+    ) as Post[];
+    
+    console.log(`[getAllPosts] Found ${publishedPosts.length} published posts (RLS filtered)`);
+    return publishedPosts;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('getAllPosts failed:', message);
+    console.error('[getAllPosts] Failed:', message);
     throw error;
   }
 };
 
+/**
+ * Get a blog post by slug
+ * Uses anon client which respects RLS policy: published_at IS NOT NULL AND published_at <= NOW()
+ * RLS policy automatically filters, so we rely on it for published posts
+ */
 export const getPostBySlug = async (slug: string): Promise<Post | null> => {
   try {
     if (!slug || typeof slug !== 'string' || slug.trim().length === 0) {
-      console.error('getPostBySlug: Invalid slug provided');
+      console.error('[getPostBySlug] Invalid slug provided');
       return null;
     }
 
-    const client = getSupabaseClient();
+    const client = getSupabaseClient(); // Anon client respects RLS
     const trimmedSlug = slug.trim();
-    const now = new Date();
-    const nowISO = now.toISOString();
-    
-    // Add 1 hour buffer to account for timezone differences
-    // This allows posts published "today" to be shown even if server time is slightly ahead
-    const bufferTime = new Date(now.getTime() + 60 * 60 * 1000); // +1 hour
-    const bufferISO = bufferTime.toISOString();
     
     console.log(`[getPostBySlug] Searching for post with slug: "${trimmedSlug}"`);
-    console.log(`[getPostBySlug] Current time: ${nowISO}`);
-    console.log(`[getPostBySlug] Buffer time: ${bufferISO}`);
     
-    // First, try to get the post without date filtering to see if it exists
-    const { data: postWithoutFilter, error: checkError } = await client
-      .from('posts')
-      .select('id, slug, title, published_at, content_html')
-      .eq('slug', trimmedSlug)
-      .single();
-    
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error('[getPostBySlug] Error checking post existence:', {
-        code: checkError.code,
-        message: checkError.message,
-        slug: trimmedSlug,
-      });
-    }
-    
-    if (postWithoutFilter) {
-      console.log(`[getPostBySlug] Found post:`, {
-        slug: postWithoutFilter.slug,
-        title: postWithoutFilter.title,
-        published_at: postWithoutFilter.published_at,
-        hasContent: !!postWithoutFilter.content_html,
-      });
-      
-      // Check if published_at is in the past (with buffer)
-      if (postWithoutFilter.published_at) {
-        const publishedDate = new Date(postWithoutFilter.published_at);
-        const isPublished = publishedDate <= bufferTime;
-        console.log(`[getPostBySlug] Published date: ${postWithoutFilter.published_at}`);
-        console.log(`[getPostBySlug] Is published (with buffer): ${isPublished}`);
-        
-        if (!isPublished) {
-          console.warn(`[getPostBySlug] Post "${trimmedSlug}" is scheduled for future: ${postWithoutFilter.published_at}`);
-          // Still return it if it's within 24 hours (might be timezone issue)
-          const hoursDiff = (publishedDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-          if (hoursDiff > 24) {
-            console.log(`[getPostBySlug] Post is more than 24 hours in future, not returning`);
-            return null;
-          } else {
-            console.log(`[getPostBySlug] Post is within 24 hours, allowing it (timezone adjustment)`);
-          }
-        }
-      } else {
-        console.warn(`[getPostBySlug] Post "${trimmedSlug}" has null published_at (draft)`);
-        return null;
-      }
-    }
-    
-    // Now fetch with proper filtering (using buffer for timezone)
+    // RLS policy automatically filters: published_at IS NOT NULL AND published_at <= NOW()
+    // So we can just query by slug - RLS handles the filtering
     const { data, error } = await client
       .from('posts')
       .select('*')
       .eq('slug', trimmedSlug)
-      .not('published_at', 'is', null)
-      .lte('published_at', bufferISO)
       .single();
     
     if (error) {
       if (error.code === 'PGRST116') {
-        // No rows returned - post not found or not published
-        console.log(`[getPostBySlug] Post with slug "${trimmedSlug}" not found or not published`);
-        
-        // If we found it without filter but not with filter, it's a date issue
-        if (postWithoutFilter) {
-          console.error(`[getPostBySlug] Post exists but date filter is blocking it!`, {
-            published_at: postWithoutFilter.published_at,
-            now: nowISO,
-            buffer: bufferISO,
-          });
-          // Return the post anyway if it exists (date might be slightly in future due to timezone)
-          if (postWithoutFilter.published_at) {
-            const publishedDate = new Date(postWithoutFilter.published_at);
-            const hoursDiff = Math.abs((publishedDate.getTime() - now.getTime()) / (1000 * 60 * 60));
-            if (hoursDiff < 48) { // Within 48 hours, allow it (timezone issue)
-              console.log(`[getPostBySlug] Allowing post despite date filter (within 48h window)`);
-              // Fetch full post data
-              const { data: fullPost } = await client
-                .from('posts')
-                .select('*')
-                .eq('slug', trimmedSlug)
-                .single();
-              if (fullPost) {
-                if (fullPost.content_html === null || fullPost.content_html === undefined) {
-                  fullPost.content_html = '';
-                }
-                return fullPost as Post;
-              }
-            }
-          }
-        }
+        // No rows returned - post not found or not published (RLS filtered it out)
+        console.log(`[getPostBySlug] Post with slug "${trimmedSlug}" not found or not published (RLS filtered)`);
         return null;
       }
       console.error('[getPostBySlug] Error fetching post:', {
@@ -298,6 +234,17 @@ export const getPostBySlug = async (slug: string): Promise<Post | null> => {
       data.content_html = '';
     }
 
+    // Double-check published_at (RLS should have filtered, but verify)
+    if (data.published_at) {
+      const publishedDate = new Date(data.published_at);
+      const now = new Date();
+      if (publishedDate > now) {
+        console.warn(`[getPostBySlug] Post "${trimmedSlug}" has future published_at, but RLS allowed it. This shouldn't happen.`);
+      }
+    } else {
+      console.warn(`[getPostBySlug] Post "${trimmedSlug}" has null published_at, but RLS allowed it. This shouldn't happen.`);
+    }
+
     console.log(`[getPostBySlug] Successfully fetched post: "${data.title}"`);
     return data as Post;
   } catch (error: unknown) {
@@ -312,27 +259,43 @@ export const getPostBySlug = async (slug: string): Promise<Post | null> => {
   }
 };
 
+/**
+ * Get published blog posts by tag
+ * Uses anon client which respects RLS policy: published_at IS NOT NULL AND published_at <= NOW()
+ * RLS policy automatically filters, so we don't need manual filtering
+ */
 export const getPostsByTag = async (tag: string): Promise<Post[]> => {
   try {
-    const client = getSupabaseClient();
+    const client = getSupabaseClient(); // Anon client respects RLS
     
+    // RLS policy automatically filters: published_at IS NOT NULL AND published_at <= NOW()
+    // So we can just query by tag - RLS handles the filtering
     const { data, error } = await client
       .from('posts')
       .select('*')
       .contains('tags', [tag])
-      .not('published_at', 'is', null)
-      .lte('published_at', new Date().toISOString())
       .order('published_at', { ascending: false });
     
     if (error) {
-      console.error('Error fetching posts by tag:', error);
+      console.error('[getPostsByTag] Error fetching posts by tag:', {
+        code: error.code,
+        message: error.message,
+        tag,
+      });
       throw error;
     }
     
-    return (data || []) as Post[];
+    // RLS should have already filtered, but double-check in case RLS is disabled
+    const now = new Date().toISOString();
+    const publishedPosts = (data || []).filter(post => 
+      post.published_at && new Date(post.published_at) <= new Date(now)
+    ) as Post[];
+    
+    console.log(`[getPostsByTag] Found ${publishedPosts.length} published posts with tag "${tag}" (RLS filtered)`);
+    return publishedPosts;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('getPostsByTag failed:', message);
+    console.error('[getPostsByTag] Failed:', message);
     throw error;
   }
 };

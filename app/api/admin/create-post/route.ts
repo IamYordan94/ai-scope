@@ -64,21 +64,36 @@ export async function POST(request: NextRequest) {
       slugCounter++;
     }
 
-    // Determine publish date
-    const getPublishedAt = async (value: string | null | 'now' | undefined): Promise<string | null> => {
+    /**
+     * Determine publish date based on frontend action
+     * @param value - 'now' = publish immediately, 'draft' = save as draft (null), 'schedule' = auto-schedule, date string = specific date
+     */
+    const getPublishedAt = async (value: string | null | 'now' | 'draft' | 'schedule' | undefined): Promise<string | null> => {
       if (value === 'now') {
         return new Date().toISOString();
       }
-      if (value === null || value === undefined) {
+      if (value === 'draft') {
+        // Explicitly save as draft (published_at = null)
+        return null;
+      }
+      if (value === 'schedule' || value === null || value === undefined) {
         // Auto-schedule: find next available date
         const nextDate = await getNextAvailablePublishDate();
         return nextDate.toISOString();
       }
-      if (value) {
-        // Specific date provided
-        return new Date(value).toISOString();
+      // Try to parse as date string
+      try {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) {
+          return date.toISOString();
+        }
+      } catch {
+        // Invalid date string, treat as draft
+        console.warn(`[create-post] Invalid date string "${value}", saving as draft`);
+        return null;
       }
-      return null; // Draft
+      // Default to draft if value doesn't match any case
+      return null;
     };
 
     const publishedAt = await getPublishedAt(body.published_at);

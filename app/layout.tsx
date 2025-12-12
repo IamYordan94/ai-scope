@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from 'next/script';
 import "./globals.css";
 import Link from 'next/link';
 import { Search } from 'lucide-react';
@@ -10,6 +9,7 @@ import WebVitals from '@/components/WebVitals';
 import ErrorTrackingScript from '@/components/ErrorTrackingScript';
 import ServiceWorker from '@/components/ServiceWorker';
 import CookieConsent from '@/components/CookieConsent';
+import AdSenseHead from '@/components/AdSenseHead';
 
 export const metadata: Metadata = {
   title: "aItoolfinder - Discover the Best AI Tools",
@@ -43,13 +43,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
-        {/* AdSense Script - beforeInteractive strategy injects into head */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9007185070437670"
-          crossOrigin="anonymous"
-          strategy="beforeInteractive"
-        />
+        {/* AdSense Script - Injected into head tag as required by Google */}
+        <AdSenseHead />
         <ThemeProvider>
         <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
