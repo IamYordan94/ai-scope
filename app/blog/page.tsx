@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getAllPosts } from '@/lib/supabase';
-import { Calendar, Tag } from 'lucide-react';
+import { Tag } from 'lucide-react';
 import type { Metadata } from 'next';
 import AdSense from '@/components/AdSense';
 
@@ -113,20 +113,7 @@ export default async function BlogPage() {
                       </p>
                     )}
                     
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700 mt-auto">
-                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                        <Calendar className="w-4 h-4" />
-                        {post.published_at && (
-                          <time dateTime={post.published_at}>
-                            {new Date(post.published_at).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                            })}
-                          </time>
-                        )}
-                      </div>
-                      
+                    <div className="flex items-center justify-end pt-4 border-t border-gray-100 dark:border-gray-700 mt-auto">
                       {post.tags && post.tags.length > 0 && (
                         <div className="flex items-center gap-1">
                           <Tag className="w-4 h-4 text-gray-400 dark:text-gray-500" />
